@@ -5,6 +5,7 @@ const path = require('path');
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
 const app = express();
+
 const PORT = process.env.PORT || 3000;
 const SECRET_KEY = 'your_secret_key';
  
@@ -74,7 +75,7 @@ app.get('/index', requireAuth, (req, res) => {
 });
  
  
-app.get('/post', requireAuth, (req, res) => res.render('post'));
+app.get('/post', requireAuth, (req, res) => res.render('posts'));
  
 app.get('/posts', authenticateJWT, (req, res) => {
   const userId = req.user.userId;  // Extract userId from the authenticated user
@@ -151,39 +152,74 @@ app.post('/register', async (req, res) => {
 
 
 // Login user
+// app.post('/login', async (req, res) => {
+//   const { username, password } = req.body;
+//  console.log("1", req.body)
+//    try {
+//     // Find the user based on username (ideally, password should be hashed)
+//     const user = await User.findOne({ username });
+//     console.log("2")
+//     if (!user || user.password !== password) {
+//       console.log("3 i am inside invalid condition")
+//       // If invalid credentials, redirect back to login with error message
+//       return res.redirect(`/login?error=Error: Invalid username or password`);
+//       // return res.render('login', { error: 'Invalid username or password' });
+//       // return res.json({ error: 'Invalid username or password' });
+//      }else{
+//       console.log("4")
+//             // Generate the token
+//           const token = jwt.sign({ userId: user._id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+//         console.log(token);  // Log the generated token for debugging
+    
+//         // Store the token in session for session-based authentication (optional)
+//         req.session.token = token;
+    
+//         // For Postman: Return the token as a response
+//         if (req.headers.accept && req.headers.accept.includes('application/json')) {
+//           return res.json({ token });  // Send the token as JSON
+//         }
+    
+//         // For Browser: Redirect to the index page and pass the username as a query parameter
+//         return res.redirect(`/index`);
+          
+//      }
+ 
+//     console.log("5")
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: 'Internal Server Error' });
+//   }
+// });
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
- console.log("1", req.body)
+ 
    try {
     // Find the user based on username (ideally, password should be hashed)
     const user = await User.findOne({ username });
-    console.log("2")
-    if (!user || user.password !== password) {
-      console.log("3 i am inside invalid condition")
-      // If invalid credentials, redirect back to login with error message
-      // return res.redirect(`/login?error=Error: Invalid username or password`);
-      // return res.render('login', { error: 'Invalid username or password' });
-      return res.json({ error: 'Invalid username or password' });
-     }else{
-      console.log("4")
-            // Generate the token
-          const token = jwt.sign({ userId: user._id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
-        console.log(token);  // Log the generated token for debugging
-    
-        // Store the token in session for session-based authentication (optional)
-        req.session.token = token;
-    
-        // For Postman: Return the token as a response
-        if (req.headers.accept && req.headers.accept.includes('application/json')) {
-          return res.json({ token });  // Send the token as JSON
-        }
-    
-        // For Browser: Redirect to the index page and pass the username as a query parameter
-        return res.redirect(`/index`);
-          
-     }
  
-    console.log("5")
+    if (!user || user.password !== password) {
+      // If invalid credentials, redirect back to login with error message
+      return res.redirect(`/login?error=Incorrect username and password`);
+    //   console.log("error message");
+    //   const errorMessage = "Incorrect username and password";
+    //  return res.render('login',{error:errorMessage} );
+    }
+ 
+    // Generate the token
+    const token = jwt.sign({ userId: user._id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
+    console.log(token);  // Log the generated token for debugging
+ 
+    // Store the token in session for session-based authentication (optional)
+    req.session.token = token;
+ 
+    // For Postman: Return the token as a response
+    if (req.headers.accept && req.headers.accept.includes('application/json')) {
+      return res.json({ token });  // Send the token as JSON
+    }
+ 
+    // For Browser: Redirect to the index page
+    res.redirect('/index');
+     // Optionally, you could send the token in a cookie instead
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Internal Server Error' });

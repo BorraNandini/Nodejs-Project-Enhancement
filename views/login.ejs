@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
+ 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -179,53 +179,57 @@
         }
 
     </style>
-    <script>
-        document.getElementById('login-form').addEventListener('submit', async function(event) {
-            event.preventDefault(); // Prevent the default form submission
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const response = await fetch('/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
-            });
-            const result = await response.json();
-            if (result.error) {
-                document.getElementById('errorBox').innerText = result.error;
-            } else {
-                window.location.href = '/index';
-            }
-        });
- 
-    </script>
 </head>
-
+ 
 <body>
     <div class="container">
         <h1>Login</h1>
-
+ 
         <!-- Error message box -->
-        
-        <% if (typeof error !== 'undefined') { %>
-            <div id="errorBox" class="error-box"><%= error %></div>
-        <% } %>
-
+        <div id="errorBox" class="error-box">
+            <button class="close-btn" onclick="closeErrorBox()">×</button>
+            <span id="errorMessage"></span>
+        </div>
+ 
         <!-- Login Form -->
-        <form id="login-form" class="auth-form">
+        <form action="/login" method="post" class="auth-form">
             <label for="username">Username:</label>
-            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+            <input type="text" id="username" name="username" required>
+            <br>
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Enter your password" required>
-            <button type="submit" onclick={abc}>Login</button>
+            <input type="password" id="password" name="password" required>
+            <br>
+            <button type="submit">Login</button>
         </form>
-
+ 
         <p>Don't have an account? <a href="/register">Register here</a>.</p>
     </div>
-
-    
-
+ 
+    <script>
+        // Function to display error message
+        function displayErrorMessage(message) {
+            const errorBox = document.getElementById('errorBox');
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;  // Set the error message
+            errorBox.style.display = 'block';  // Show the error box
+        }
+ 
+        // Function to close the error message box
+        function closeErrorBox() {
+            const errorBox = document.getElementById('errorBox');
+            errorBox.style.display = 'none';  // Hide the error box
+        }
+ 
+        // Check if error message exists (sent from the backend)
+        // window.onload = function () {
+        //     const urlParams = new URLSearchParams(window.location.search);
+        //     const errorMessage = urlParams.get('error');  // Get 'error' parameter from the URL
+ 
+        //     if (errorMessage) {
+        //         displayErrorMessage(decodeURIComponent(errorMessage));  // Display the error message in the error box
+        //     }
+        // };
+    </script>
 </body>
-
+ 
 </html>
