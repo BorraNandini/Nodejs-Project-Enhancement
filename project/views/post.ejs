@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create and Manage Posts</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      background: linear-gradient(45deg, #f8c7dc, #a3c8f7, #f0e6b0, #f6d1d1);
+      background-size: 400% 400%;
+      animation: gradientAnimation 15s ease infinite;
+      box-sizing: border-box;
+    }
+
+    header {
+      width: 100%;
+      background-color: #0077cc;
+      color: #fff;
+      padding: 20px 40px;
+      text-align: right;
+      position: fixed;
+      top: 0;
+      z-index: 1000;
+    }
+
+    h1 {
+      color: #333;
+      font-size: 2.5em;
+      margin-top: 80px;
+      text-align: center;
+      opacity: 0;
+      animation: fadeIn 1s ease-out forwards 0.5s;
+    }
+
+    /* Post Form and Post List styles */
+    .container {
+      width: 80%;
+      max-width: 900px;
+      margin-top: 120px;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      opacity: 0;
+      animation: slideUp 1s ease-out forwards 0.5s;
+    }
+
+    .post-form {
+      margin-bottom: 30px;
+    }
+
+    label, textarea {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+      color: #333;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      transition: border-color 0.3s ease;
+    }
+
+    textarea:focus {
+      border-color: #7fa3d7;
+      box-shadow: 0 0 5px rgba(127, 163, 215, 0.6);
+    }
+
+    button {
+      background-color: #7fa3d7;
+      color: #fff;
+      padding: 12px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+    }
+
+    button:hover {
+      background-color: #5e87c4;
+    }
+
+    .post-list {
+      margin-top: 30px;
+    }
+
+    .post {
+      border-bottom: 1px solid #ccc;
+      padding: 15px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background-color: #fafafa;
+      border-radius: 8px;
+    }
+
+    .post:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .post-text {
+      flex-grow: 1;
+      margin-right: 10px;
+      font-size: 1.1em;
+      color: #333;
+      word-wrap: break-word;
+    }
+
+    .edit-post-btn, .delete-post-btn {
+      padding: 8px 12px;
+      margin-right: 10px;
+      cursor: pointer;
+      background-color: #7fa3d7;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      transition: background-color 0.3s ease;
+    }
+
+    .edit-post-btn:hover, .delete-post-btn:hover {
+      background-color: #5e87c4;
+    }
+
+    .pagination {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .pagination button {
+      background-color: #7fa3d7;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      margin: 0 5px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+
+    .pagination button:hover {
+      background-color: #5e87c4;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes gradientAnimation {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <button id="logoutBtn" onclick="logout()">Logout</button>
+  </header>
+
+  <div class="container">
+    <h1>Create and Manage Posts</h1>
+
+    <div class="post-form">
+      <label for="text">Create a new post:</label>
+      <textarea id="text" name="text" rows="4" required></textarea>
+      <button onclick="createPost()">Create Post</button>
+    </div>
+
+    <div class="post-list" id="postList"></div>
+
+    <div class="pagination" id="pagination"></div>
+  </div>
+
+  <script>
+    const posts = [];
+    const postsPerPage = 3;
+    let currentPage = 1;
+
+    function createPost() {
+      const text = document.getElementById('text').value;
+      if (text) {
+        fetch('/post', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          },
+          body: JSON.stringify({ text })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.postId) {
+            posts.push({ id: data.postId, text });
+            updatePostList();
+            document.getElementById('text').value = ''; // Clear the input field
+          } else {
+            console.error('Failed to create post:', data);
+          }
+        })
+        .catch(error => console.error('Error creating post:', error));
+      }
+    }
+
+    function deletePost(postId) {
+      fetch(`/posts/${postId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message === 'Post deleted') {
+          posts = posts.filter(post => post.id !== postId);
+          updatePostList();
+        } else {
+          console.error('Failed to delete post:', data);
+        }
+      })
+      .catch(error => console.error('Error deleting post:', error));
+    }
+
+    function editPost(postId) {
+      const post = posts.find(post => post.id === postId);
+      if (!post) {
+        console.error('Post not found!');
+        return;
+      }
+
+      const newText = prompt('Edit the post:', post.text);
+      if (newText !== null && newText !== post.text) {
+        post.text = newText;
+        updatePostList();
+
+        fetch(`/posts/${postId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          },
+          body: JSON.stringify({ text: newText })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.updatedPost) {
+            console.log('Post updated successfully:', data.updatedPost);
+          } else {
+            console.error('Failed to update post:', data);
+          }
+        })
+        .catch(error => {
+          console.error('Error updating post:', error);
+        });
+      }
+    }
+
+    function updatePostList() {
+      const postList = document.getElementById('postList');
+      const pagination = document.getElementById('pagination');
+      const startIndex = (currentPage - 1) * postsPerPage;
+      const endIndex = startIndex + postsPerPage;
+
+      postList.innerHTML = '';
+
+      if (posts.length === 0) {
+        postList.innerHTML = '<p>No posts available.</p>';
+        pagination.innerHTML = '';
+        return;
+      }
+
+      posts.slice(startIndex, endIndex).forEach(post => {
+        const postElement = document.createElement('div');
+        postElement.classList.add('post');
+
+        const postText = document.createElement('div');
+        postText.classList.add('post-text');
+        postText.textContent = post.text;
+
+        const editButton = document.createElement('span');
+        editButton.classList.add('edit-post-btn');
+        editButton.textContent = 'Edit';
+        editButton.onclick = () => editPost(post.id);
+
+        const deleteButton = document.createElement('span');
+        deleteButton.classList.add('delete-post-btn');
+        deleteButton.textContent = 'Delete';
+        deleteButton.onclick = () => deletePost(post.id);
+
+        postElement.appendChild(postText);
+        postElement.appendChild(editButton);
+        postElement.appendChild(deleteButton);
+
+        postList.appendChild(postElement);
+      });
+
+      const totalPages = Math.ceil(posts.length / postsPerPage);
+      pagination.innerHTML = '';
+
+      const maxPages = Math.min(5, totalPages);
+      for (let i = 1; i <= maxPages; i++) {
+        const pageButton = document.createElement('button');
+        pageButton.textContent = i;
+        pageButton.onclick = () => {
+          currentPage = i;
+          updatePostList();
+        };
+        pagination.appendChild(pageButton);
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = '/logout';
+    }
+
+    window.onload = () => fetchPosts();
+
+    function fetchPosts() {
+      fetch('/posts', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.posts) {
+          posts.length = 0;
+          data.posts.forEach(post => posts.push(post));
+          updatePostList();
+        }
+      })
+      .catch(error => console.error('Error fetching posts:', error));
+    }
+  </script>
+</body>
+</html>

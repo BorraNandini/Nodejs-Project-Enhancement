@@ -1,0 +1,338 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome - Social Media Dashboard</title>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f5f5f5;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    header {
+      background-color: #0077cc;
+      color: #fff;
+      padding: 20px;
+      text-align: right;
+    }
+
+    h1 {
+      color: #333;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    p {
+      color: #555;
+      font-size: 1.2em;
+    }
+
+    .app-names {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .app-names div {
+      padding: 10px 20px;
+      margin: 0 10px;
+      background-color: #0099ff;
+      color: #fff;
+      border-radius: 5px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .button-link {
+      margin-top: 30px;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      border: 2px solid #0099ff;
+      border-radius: 8px;
+      background-color: #fff;
+      color: #0099ff;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .main-content {
+      padding: 50px;
+      background-color: white;
+      margin-top: 30px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+
+<body> -->
+  <!-- Header Section -->
+  <!-- <header>
+    <% if (username) { %> -->
+      <!-- If user is logged in -->
+      <!-- <button id="logoutBtn" class="button-link" onclick="logout()">Logout</button>
+      <button id="createPostBtn" class="button-link" onclick="redirectToPostCreation()">Create Post</button>
+    <% } else { %> -->
+      <!-- If user is not logged in
+      <button id="registerBtn" class="button-link" onclick="window.location.href='/register'">Register</button>
+      <button id="loginBtn" class="button-link" onclick="window.location.href='/login'">Login</button>
+    <% } %>
+  </header> -->
+
+  <!-- Main content section -->
+  <!-- <div class="main-content">
+    <h1>Welcome to the Social Media Dashboard App!</h1> -->
+    
+    <!-- Conditional Welcome Message -->
+    <!-- <p id="welcomeMessage">
+      <% if (username) { %>
+        Welcome, <%= username %>! You are successfully logged in. Manage your social media accounts and create posts.
+      <% } else { %>
+        Explore and manage your social media account in one place. Please <a href="/login">log in</a> or <a href="/register">register</a> to continue.
+      <% } %>
+    </p>
+  </div> -->
+
+  <!-- Logout function -->
+  <!-- <script>
+    function logout() {
+      window.location.href = '/logout';
+    }
+
+    function redirectToPostCreation() {
+      window.location.href = '/post';
+    }
+  </script>
+</body>
+
+</html> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome - Social Media Dashboard</title>
+  <style>
+    /* General styling */
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f5f5f5;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+      color: #000;
+      text-shadow: none;
+      opacity: 0;
+      animation: fadeIn 1.5s ease-in-out forwards;
+    }
+
+    p {
+      font-size: 1.2em;
+      color: #000;
+      opacity: 0;
+      animation: fadeIn 2s ease-in-out forwards;
+      animation-delay: 1s;
+    }
+
+    .app-names {
+      display: flex;
+      justify-content: center;
+      margin-top: 30px;
+    }
+
+    .app-names div {
+      padding: 10px 20px;
+      margin: 0 10px;
+      background-color: #0099ff;
+      color: #fff;
+      border-radius: 5px;
+      font-weight: bold;
+      text-transform: uppercase;
+      animation: slideUp 1.5s ease-in-out forwards;
+    }
+
+    .button-link {
+      margin-top: 30px;
+      padding: 15px 30px;
+      font-size: 1.2em;
+      border: 2px solid #0099ff;
+      border-radius: 8px;
+      background-color: #fff;
+      color: #0099ff;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      opacity: 0;
+      animation: fadeIn 2s ease-in-out forwards;
+      animation-delay: 2s;
+    }
+
+    .main-content {
+      padding: 50px;
+      background-color: rgba(255, 255, 255, 0.9);
+      margin-top: 100px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+      opacity: 0;
+      animation: fadeIn 2s ease-in-out forwards;
+      animation-delay: 3s;
+    }
+
+    /* Background animation */
+    .background {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #ff6b81, #ffecb3, #c1c8e4);
+      animation: gradient 10s ease infinite;
+      z-index: -1;
+    }
+
+    /* Fade-in animation */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* Slide-up animation for app names */
+    @keyframes slideUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Gradient animation for background */
+    @keyframes gradient {
+      0% {
+        background: linear-gradient(45deg, #ff6b81, #ffecb3, #c1c8e4);
+      }
+      50% {
+        background: linear-gradient(45deg, #a1c4fd, #c2e9fb, #f1c6c2);
+      }
+      100% {
+        background: linear-gradient(45deg, #ff6b81, #ffecb3, #c1c8e4);
+      }
+    }
+
+    /* Media Query for mobile responsiveness */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.2em;
+      }
+
+      p {
+        font-size: 1em;
+      }
+
+      .button-link {
+        font-size: 1em;
+        padding: 10px 20px;
+      }
+
+      .main-content {
+        padding: 30px;
+      }
+    }
+
+    /* Style for the buttons at the bottom */
+    .bottom-buttons {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+  </style>
+</head>
+
+<body>
+  <!-- Background animation -->
+  <div class="background"></div>
+
+  <!-- Main content section -->
+  <div class="main-content">
+    <h1>Welcome to the Social Media Dashboard App!</h1>
+    
+    <!-- Conditional Welcome Message -->
+    <p id="welcomeMessage">
+      <% if (username) { %>
+         <%= username %>! You are successfully logged in. Manage your social media accounts and create posts.
+      <% } else { %>
+       Please <a href="/login">log in</a> or <a href="/register">register</a> to continue.
+      <% } %>
+    </p>
+  </div>
+
+  <!-- Bottom Buttons -->
+  <div class="bottom-buttons">
+    <% if (username) { %>
+      <!-- If user is logged in -->
+      <button id="createPostBtn" class="button-link" onclick="redirectToPostCreation()">Create Post</button>
+      <button id="logoutBtn" class="button-link" onclick="logout()">Logout</button>
+    <% } else { %>
+      <!-- If user is not logged in -->
+      <!-- <button id="loginBtn" class="button-link" onclick="window.location.href='/login'">Login</button>
+      <button id="registerBtn" class="button-link" onclick="window.location.href='/register'">Register</button> -->
+      Explore and manage your social media account in one place.
+    <% } %>
+  </div>
+
+  <!-- Logout function -->
+  <script>
+    function logout() {
+      window.location.href = '/logout';
+    }
+
+    function redirectToPostCreation() {
+      window.location.href = '/post';
+    }
+  </script>
+</body>
+
+</html>
+
