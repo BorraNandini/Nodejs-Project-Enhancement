@@ -1,10 +1,12 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const session = require('express-session');
+const multer = require('multer');
 const path = require('path');
 const mongoose = require('mongoose');
 const { ObjectId } = mongoose.Types;
 const app = express();
+const upload = multer({ dest: 'uploads/' });
 
 const PORT = process.env.PORT || 3000;
 const SECRET_KEY = 'your_secret_key';
@@ -15,15 +17,18 @@ const uri = "mongodb://localhost:27017";
 mongoose.connect(uri, { 'dbName': 'userDashboard' });
  
 const User = mongoose.model('User', { username: String, email: String, password: String });
-const Post = mongoose.model('Post', { userId: mongoose.Schema.Types.ObjectId, text: String });
- 
+const Post = mongoose.model('Post', { userId: mongoose.Schema.Types.ObjectId,title: String, text: String, imageUrl: String });
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(session({ secret: SECRET_KEY, resave: false, saveUninitialized: true, cookie: { secure: false } }));
- 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); 
+
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views')); // Set the views folder for EJS templates
+
+ 
  
 function authenticateJWT(req, res, next) {
   const token = req.session.token;
@@ -150,46 +155,6 @@ app.post('/register', async (req, res) => {
   }
 });
 
-
-// Login user
-// app.post('/login', async (req, res) => {
-//   const { username, password } = req.body;
-//  console.log("1", req.body)
-//    try {
-//     // Find the user based on username (ideally, password should be hashed)
-//     const user = await User.findOne({ username });
-//     console.log("2")
-//     if (!user || user.password !== password) {
-//       console.log("3 i am inside invalid condition")
-//       // If invalid credentials, redirect back to login with error message
-//       return res.redirect(`/login?error=Error: Invalid username or password`);
-//       // return res.render('login', { error: 'Invalid username or password' });
-//       // return res.json({ error: 'Invalid username or password' });
-//      }else{
-//       console.log("4")
-//             // Generate the token
-//           const token = jwt.sign({ userId: user._id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
-//         console.log(token);  // Log the generated token for debugging
-    
-//         // Store the token in session for session-based authentication (optional)
-//         req.session.token = token;
-    
-//         // For Postman: Return the token as a response
-//         if (req.headers.accept && req.headers.accept.includes('application/json')) {
-//           return res.json({ token });  // Send the token as JSON
-//         }
-    
-//         // For Browser: Redirect to the index page and pass the username as a query parameter
-//         return res.redirect(`/index`);
-          
-//      }
- 
-//     console.log("5")
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ message: 'Internal Server Error' });
-//   }
-// });
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
  
@@ -207,7 +172,7 @@ app.post('/login', async (req, res) => {
  
     // Generate the token
     const token = jwt.sign({ userId: user._id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
-    console.log(token);  // Log the generated token for debugging
+    // console.log(token);  // Log the generated token for debugging
  
     // Store the token in session for session-based authentication (optional)
     req.session.token = token;
@@ -227,14 +192,36 @@ app.post('/login', async (req, res) => {
 });
 
 // Create post
-app.post('/post', authenticateJWT, (req, res) => {
-  const { text } = req.body;
+// app.post('/post', authenticateJWT, (req, res) => {
+//   const { text } = req.body;
  
-  if (!text || typeof text !== 'string') {
-    return res.status(400).json({ message: 'Please provide valid post content' });
+//   if (!text || typeof text !== 'string') {
+//     return res.status(400).json({ message: 'Please provide valid post content' });
+//   }
+ 
+//   const newPost = new Post({ userId: req.user.userId, text });
+ 
+//   newPost.save()
+//     .then(post => {
+//       res.status(201).json({ message: 'Post created successfully', postId: post._id });
+//     })
+//     .catch(err => res.status(500).json({ message: 'Error saving post' }));
+// });
+
+app.post('/post', authenticateJWT, upload.single('image'), (req, res) => {
+  const { title, text } = req.body;  // Get the title from the request body
+  const imageUrl = req.file ? '/uploads/' + req.file.filename : ''; // Get the uploaded image URL
+ 
+  if (!title || !text || typeof title !== 'string' || typeof text !== 'string') {
+    return res.status(400).json({ message: 'Please provide a valid title and content' });
   }
  
-  const newPost = new Post({ userId: req.user.userId, text });
+  const newPost = new Post({
+    userId: req.user.userId,
+    title,  // Save the title here
+    text,
+    imageUrl
+  });
  
   newPost.save()
     .then(post => {
@@ -242,8 +229,6 @@ app.post('/post', authenticateJWT, (req, res) => {
     })
     .catch(err => res.status(500).json({ message: 'Error saving post' }));
 });
-
-
 
 //create user
 app.post('/api/users', async (req, res) => {

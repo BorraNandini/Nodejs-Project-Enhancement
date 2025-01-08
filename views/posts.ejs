@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -378,6 +378,465 @@
       })
       .catch(error => console.error('Error fetching posts:', error));
     }
+  </script>
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create and Manage Posts</title>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: #f5f5f5;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+ 
+    header {
+      background-color: #0077cc;
+      color: #fff;
+      padding: 20px;
+      text-align: right;
+    }
+ 
+    h1 {
+      color: #333;
+      font-size: 2.5em;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+ 
+    .post-form, .post-list {
+      width: 60%;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+ 
+    label, input, textarea {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+      color: #333;
+    }
+ 
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+ 
+    button {
+      background-color: #0099ff;
+      color: #fff;
+      padding: 10px 20px;
+      font-size: 1.2em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+ 
+    .post {
+      border-bottom: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+ 
+    .post-title {
+      font-size: 1.5em;
+      font-weight: bold;
+      color: #333;
+    }
+ 
+    .post-text {
+      font-size: 1.1em;
+      color: #333;
+      margin-top: 10px;
+    }
+ 
+    .post-image {
+      max-width: 100%;
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+ 
+    .post-buttons {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 10px;
+    }
+ 
+    .edit-post-btn, .delete-post-btn {
+      padding: 8px 12px;
+      margin-left: 5px;
+      cursor: pointer;
+      background-color: #0099ff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 1.1em;
+    }
+ 
+    .pagination {
+      margin-top: 20px;
+    }
+ 
+    .pagination button {
+      background-color: #0099ff;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      margin: 0 5px;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+ 
+    .pagination button:hover {
+      background-color: #0077cc;
+    }
+ 
+    .total-posts {
+      font-size: 1.2em;
+      color: #333;
+      margin-bottom: 20px;
+    }
+ 
+    /* Image preview style */
+    .image-preview {
+      margin-top: 10px;
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <button id="logoutBtn" onclick="logout()">Logout</button>
+  </header>
+ 
+  <h1>Create and Manage Posts</h1>
+ 
+  <div class="post-form">
+    <label for="title">Title:</label>
+    <input type="text" id="title" name="title" required>
+ 
+    <label for="text">Description:</label>
+    <textarea id="text" name="text" rows="4" required></textarea>
+ 
+    <label for="image">Upload Image:</label>
+    <input type="file" id="image" name="image" required>
+ 
+    <!-- Image preview container -->
+    <div class="image-preview" id="imagePreviewContainer">
+      <img id="imagePreview" class="post-image" src="" alt="Image Preview">
+    </div>
+ 
+    <button onclick="createPost()">Create Post</button>
+
+  </div>
+ 
+  <!-- Total posts count display -->
+  <div class="total-posts" id="totalPosts">Total Posts: 0</div>
+ 
+  <div class="post-list" id="postList"></div>
+ 
+  <div class="pagination" id="pagination"></div>
+ 
+  <script>
+    const posts = [];
+    const postsPerPage = 3;
+    let currentPage = 1;
+ 
+    // Function to preview the uploaded image
+    function previewImage(event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+ 
+      reader.onload = function(e) {
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+       
+        imagePreview.src = e.target.result;
+        imagePreviewContainer.style.display = 'block';  // Show the image preview
+      };
+ 
+      if (file) {
+        reader.readAsDataURL(file);
+      }
+    }
+ 
+    // Function to create a new post with title, description, and image
+    function createPost() {
+      const title = document.getElementById('title').value;
+      const text = document.getElementById('text').value;
+      const image = document.getElementById('image').files[0];  // Get the file object
+
+      if (title && text) {
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('text', text);
+
+        if (image) {
+          formData.append('image', image); // Append the image file
+        }
+
+        fetch('/post', {
+          method: 'POST',
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          },
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.postId) {
+            posts.unshift({
+              id: data.postId,
+              title,
+              text,
+              imageUrl: data.imageUrl || '' // Store the image URL
+            });
+            updatePostList();
+
+            // Clear form fields after posting
+            document.getElementById('title').value = '';
+            document.getElementById('text').value = '';
+            document.getElementById('image').value = '';
+            document.getElementById('imagePreviewContainer').style.display = 'none'; // Hide preview
+          } else {
+            console.error('Failed to create post:', data);
+          }
+        })
+        .catch(error => {
+          console.error('Error creating post:', error);
+        });
+      } else {
+        alert("Please fill out the title and text fields.");
+      }
+    }
+
+ 
+    // Function to delete a post
+    function deletePost(postId) {
+      console.log(`Deleting post with ID: ${postId}`);
+      fetch(`/posts/${postId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message === 'Post deleted') {
+          const index = posts.findIndex(post => post._id === postId);
+          if (index !== -1) {
+            posts.splice(index, 1); // Remove post from the array
+          }
+          updatePostList(); // Update the UI to reflect changes
+        } else {
+          console.error('Failed to delete post:', data);
+        }
+      })
+      .catch(error => {
+        console.error('Error deleting post:', error);
+      });
+    }
+
+    // Function to edit a post's title, description, and image
+    function editPost(postId) {
+      const post = posts.find(post => post._id === postId); // Find the post by its ID
+
+      if (!post) {
+        console.error('Post not found!');
+        return;
+      }
+
+      // Prompt for new title and description
+      const newTitle = prompt('Edit the title:', post.title);
+      const newText = prompt('Edit the description:', post.text);
+
+      const newImageFile = document.createElement('input');
+      newImageFile.type = 'file';
+      newImageFile.accept = 'image/*';
+      
+      newImageFile.onchange = function (e) {
+        const newImage = e.target.files[0]; // Get the selected file
+
+        const formData = new FormData();
+        formData.append('title', newTitle || post.title);
+        formData.append('text', newText || post.text);
+
+        if (newImage) {
+          formData.append('image', newImage); // Include new image file in the request
+        }
+
+        fetch(`/posts/${postId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': 'Bearer ' + localStorage.getItem('token')
+          },
+          body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.updatedPost) {
+            console.log('Post updated successfully:', data.updatedPost);
+            // Update the posts array and UI
+            post.title = newTitle || post.title;
+            post.text = newText || post.text;
+            post.imageUrl = data.updatedPost.imageUrl || post.imageUrl; // Update the image URL if available
+            updatePostList();
+          } else {
+            console.error('Failed to update post:', data);
+          }
+        })
+        .catch(error => {
+          console.error('Error updating post:', error);
+        });
+      };
+
+      newImageFile.click();  // Trigger the file input to open the file picker
+    }
+
+    // Function to update and display posts in reverse order
+      function updatePostList() {
+        const postList = document.getElementById('postList');
+        const pagination = document.getElementById('pagination');
+        const totalPosts = document.getElementById('totalPosts');
+
+        const startIndex = (currentPage - 1) * postsPerPage;
+        const endIndex = startIndex + postsPerPage;
+
+        postList.innerHTML = '';
+
+        if (posts.length === 0) {
+          postList.innerHTML = '<p>No posts available.</p>';
+          pagination.innerHTML = '';
+          totalPosts.textContent = 'Total Posts: 0'; // Update total count when no posts
+          return;
+        }
+
+        totalPosts.textContent = `Total Posts: ${posts.length}`; // Update total posts count
+
+        posts.slice(startIndex, endIndex).forEach(post => {
+          const postElement = document.createElement('div');
+          postElement.classList.add('post');
+          postElement.id = `post-${post.id}`;
+
+          const postTitle = document.createElement('div');
+          postTitle.classList.add('post-title');
+          postTitle.textContent = post.title;
+
+          const postText = document.createElement('div');
+          postText.classList.add('post-text');
+          postText.textContent = post.text;
+
+          // Display image if available
+          if (post.imageUrl) {
+            const postImage = document.createElement('img');
+            postImage.classList.add('post-image');
+            postImage.src = post.imageUrl; // Use the imageUrl from the post object
+            postElement.appendChild(postImage);
+          }
+
+          const postButtons = document.createElement('div');
+          postButtons.classList.add('post-buttons');
+
+          const editButton = document.createElement('span');
+          editButton.classList.add('edit-post-btn');
+          editButton.textContent = 'Edit';
+          editButton.onclick = () => editPost(post._id);
+
+          const deleteButton = document.createElement('span');
+          deleteButton.classList.add('delete-post-btn');
+          deleteButton.textContent = 'Delete';
+          deleteButton.onclick = () => deletePost(post._id);
+
+          postButtons.appendChild(editButton);
+          postButtons.appendChild(deleteButton);
+
+          postElement.appendChild(postTitle);
+          postElement.appendChild(postText);
+          postElement.appendChild(postButtons);
+
+          postList.appendChild(postElement);
+        });
+
+        const totalPages = Math.ceil(posts.length / postsPerPage);
+        pagination.innerHTML = '';
+
+        // Display pagination buttons
+        for (let i = 1; i <= totalPages; i++) {
+          const pageButton = document.createElement('button');
+          pageButton.textContent = i;
+          pageButton.onclick = () => {
+            currentPage = i;
+            updatePostList();
+          };
+          pagination.appendChild(pageButton);
+        }
+      }
+
+ 
+    // Function to handle logout
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.href = '/logout';
+    }
+ 
+    // Fetch and display all posts when the page loads
+    window.onload = () => fetchPosts();
+
+    function fetchPosts() {
+      fetch('/posts', {
+        method: 'GET',
+        headers: {
+          'Authorization': 'Bearer ' + localStorage.getItem('token')
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.posts) {
+          posts.length = 0; // Clear previous posts
+          data.posts.forEach(post => posts.push(post));
+          posts.reverse(); // Reverse to show the newest posts first
+          updatePostList();
+        }
+      })
+      .catch(error => console.error('Error fetching posts:', error));
+    }
+
+    
+
   </script>
 </body>
 </html>

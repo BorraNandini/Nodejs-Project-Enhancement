@@ -221,14 +221,14 @@
         }
  
         // Check if error message exists (sent from the backend)
-        // window.onload = function () {
-        //     const urlParams = new URLSearchParams(window.location.search);
-        //     const errorMessage = urlParams.get('error');  // Get 'error' parameter from the URL
+        window.onload = function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const errorMessage = urlParams.get('error');  // Get 'error' parameter from the URL
  
-        //     if (errorMessage) {
-        //         displayErrorMessage(decodeURIComponent(errorMessage));  // Display the error message in the error box
-        //     }
-        // };
+            if (errorMessage) {
+                displayErrorMessage(decodeURIComponent(errorMessage));  // Display the error message in the error box
+            }
+        };
     </script>
 </body>
  
